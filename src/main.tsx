@@ -3,6 +3,16 @@ import {createRoot} from 'react-dom/client';
 import App from './App.tsx';
 import './index.css';
 
+// Suppress benign Vite WebSocket errors in the sandboxed environment
+window.addEventListener('unhandledrejection', (event) => {
+  if (event.reason && (
+    event.reason.message?.includes('WebSocket') || 
+    event.reason.message?.includes('vite')
+  )) {
+    event.preventDefault();
+  }
+});
+
 console.log("App starting...");
 
 try {

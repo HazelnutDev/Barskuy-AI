@@ -2,10 +2,11 @@ export const searchService = {
   async search(query: string, provider: "ollama" | "serpapi", apiKey: string) {
     if (provider === "serpapi") {
       try {
-        // Using a proxy or direct fetch if allowed (SerpApi usually needs a backend but we can try)
-        // In this environment, we might need to use a proxy or just explain it.
-        // For now, let's use a common search API pattern.
-        const response = await fetch(`https://serpapi.com/search.json?q=${encodeURIComponent(query)}&api_key=${apiKey}`);
+        const response = await fetch("/api/search", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ query, provider, apiKey })
+        });
         const data = await response.json();
         
         if (data.organic_results) {

@@ -13,6 +13,27 @@ async function startServer() {
 
   app.use(express.json());
 
+  // API to proxy search requests
+  app.post("/api/search", async (req, res) => {
+    const { query, provider, apiKey } = req.body;
+    if (!query || !provider || !apiKey) {
+      return res.status(400).json({ error: "Missing required fields" });
+    }
+
+    if (provider === "serpapi") {
+      try {
+        const response = await fetch(`https://serpapi.com/search.json?q=${encodeURIComponent(query)}&api_key=${apiKey}`);
+        const data = await response.json();
+        res.json(data);
+      } catch (error) {
+        console.error("SerpApi proxy error:", error);
+        res.status(500).json({ error: "Failed to fetch from SerpApi" });
+      }
+    } else {
+      res.status(400).json({ error: "Unsupported search provider" });
+    }
+  });
+
   // API to save .env
   app.post("/api/save-env", (req, res) => {
     const { keys } = req.body;
