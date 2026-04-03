@@ -42,6 +42,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ settings, onUpdate
                 className="w-full bg-[var(--bg-main)] border border-[var(--border-main)] rounded-xl md:rounded-2xl p-3 md:p-4 text-sm md:text-base text-[var(--text-main)] font-bold focus:border-blue-500/50 outline-none transition-all appearance-none cursor-pointer hover:bg-[var(--border-main)]"
               >
                 <option value="gemini">Google Gemini (Cloud)</option>
+                <option value="openrouter">OpenRouter (Cloud)</option>
                 <option value="ollama">Ollama (Mesin Lokal)</option>
                 <option value="llama-cpp">Llama.cpp (Mesin Lokal GGUF)</option>
               </select>
@@ -76,6 +77,30 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ settings, onUpdate
                   Gemini API Key dikelola melalui panel Secrets AI Studio untuk keamanan maksimal.
                 </p>
               </div>
+
+              {/* OpenRouter API Key */}
+              {settings.provider === "openrouter" && (
+                <div className="space-y-3 animate-in slide-in-from-top-2 duration-300">
+                  <div className="relative">
+                    <input
+                      type="password"
+                      placeholder="Masukkan OpenRouter API Key..."
+                      className="w-full bg-[var(--bg-main)] border border-blue-500/30 rounded-xl md:rounded-2xl p-3 md:p-4 text-xs md:text-sm font-mono outline-none focus:border-blue-500 transition-all"
+                      value={settings.openRouterKey}
+                      onChange={(e) => onUpdate({ ...settings, openRouterKey: e.target.value })}
+                    />
+                    <div className="absolute right-4 top-1/2 -translate-y-1/2">
+                      <Key className="w-4 h-4 text-blue-400" />
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-2 p-2 md:p-3 bg-blue-500/5 border border-blue-500/10 rounded-xl">
+                    <Info className="w-3.5 h-3.5 md:w-4 h-4 text-blue-400 shrink-0" />
+                    <p className="text-[9px] md:text-[10px] text-blue-400/80 leading-relaxed">
+                      Dapatkan API Key di <a href="https://openrouter.ai/keys" target="_blank" rel="noreferrer" className="underline hover:text-blue-300">openrouter.ai/keys</a>.
+                    </p>
+                  </div>
+                </div>
+              )}
             </div>
           </div>
 

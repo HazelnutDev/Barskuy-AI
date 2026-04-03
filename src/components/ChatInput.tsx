@@ -8,7 +8,7 @@ interface ChatInputProps {
   onSend: (content: string, attachments: Attachment[]) => void;
   onToggleVoice: () => void;
   isLoading: boolean;
-  provider: "gemini" | "ollama" | "llama-cpp";
+  provider: "gemini" | "ollama" | "llama-cpp" | "openrouter";
   isImageMode: boolean;
   onToggleImageMode: () => void;
 }
@@ -165,7 +165,7 @@ export const ChatInput: React.FC<ChatInputProps> = ({
                 ? "Barskuy-AI sedang berpikir..." 
                 : isImageMode 
                   ? "Deskripsikan gambar yang ingin dibuat..." 
-                  : `Pesan ${provider === "gemini" ? "Gemini" : provider === "ollama" ? "Ollama" : "Llama.cpp"}...`
+                  : `Pesan ${provider === "gemini" ? "Gemini" : provider === "ollama" ? "Ollama" : provider === "llama-cpp" ? "Llama.cpp" : "OpenRouter"}...`
             }
             className="flex-1 bg-transparent border-none focus:ring-0 text-[var(--text-main)] placeholder-[var(--text-muted)] py-2.5 resize-none max-h-[200px] custom-scrollbar"
           />

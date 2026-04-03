@@ -37,7 +37,9 @@ export interface AppSettings {
   llamaCppUrl: string;
   llamaCppModel: string;
   geminiModel: string;
-  provider: "gemini" | "ollama" | "llama-cpp";
+  openRouterKey: string;
+  openRouterModel: string;
+  provider: "gemini" | "ollama" | "llama-cpp" | "openrouter";
   systemPrompt: string;
   memory: string;
   themeMode: "auto" | "dark" | "light";
@@ -54,6 +56,8 @@ export const DEFAULT_SETTINGS: AppSettings = {
   llamaCppUrl: "http://127.0.0.1:8080",
   llamaCppModel: "default",
   geminiModel: "gemini-3-flash-preview",
+  openRouterKey: "",
+  openRouterModel: "google/gemini-2.0-flash-001",
   provider: "gemini",
   systemPrompt: "Anda adalah Barskuy-AI, asisten AI yang sangat canggih dan membantu. Anda dapat memproses dokumen, gambar, dan memberikan penalaran mendalam jika diperlukan. Berikan jawaban yang akurat, profesional, dan mudah dipahami dalam Bahasa Indonesia. Jika Anda memberikan data perbandingan atau statistik, gunakan format tabel Markdown. Jika Anda memberikan data numerik yang cocok untuk grafik, sertakan blok JSON di akhir pesan Anda dengan format: ```json_chart {\"type\": \"bar|line|pie\", \"data\": [...]} ```.",
   memory: "",

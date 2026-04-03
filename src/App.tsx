@@ -9,6 +9,7 @@ import { Message, Attachment, DEFAULT_SETTINGS, AppSettings } from "./types";
 import { geminiService } from "./services/geminiService";
 import { ollamaService } from "./services/ollamaService";
 import { llamaCppService } from "./services/llamaCppService";
+import { openRouterService } from "./services/openRouterService";
 import { Sparkles, Cpu, Zap, Settings, Menu, ChevronDown, Layers, Bot, Headphones, Sun, Moon, Download, X } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
 import confetti from "canvas-confetti";
@@ -77,7 +78,7 @@ export default function App() {
     };
     mediaQuery.addEventListener("change", listener);
     return () => mediaQuery.removeEventListener("change", listener);
-  }, [settings.provider, settings.ollamaUrl, settings.llamaCppUrl, settings.themeMode]);
+  }, [settings.provider, settings.ollamaUrl, settings.llamaCppUrl, settings.openRouterKey, settings.themeMode]);
 
   const fetchModels = async () => {
     if (settings.provider === "ollama") {
@@ -86,6 +87,9 @@ export default function App() {
     } else if (settings.provider === "llama-cpp") {
       const models = await llamaCppService.getModels(settings.llamaCppUrl);
       setAvailableModels(models.map((m: any) => m.name));
+    } else if (settings.provider === "openrouter") {
+      const models = await openRouterService.getModels(settings.openRouterKey);
+      setAvailableModels(models.map((m: any) => m.id));
     } else {
       // Gemini models are usually fixed in SDK, but we can list them
       setAvailableModels([
@@ -163,7 +167,9 @@ export default function App() {
         ? settings.geminiModel 
         : settings.provider === "ollama" 
           ? settings.ollamaModel 
-          : settings.llamaCppModel,
+          : settings.provider === "llama-cpp"
+            ? settings.llamaCppModel
+            : settings.openRouterModel,
     };
 
     updateSessionMessages(sessionId, [...updatedMessages, initialAssistantMessage]);
@@ -177,7 +183,9 @@ export default function App() {
         ? geminiService.streamChat(settings.geminiModel, updatedMessages, fullSystemPrompt, attachments)
         : settings.provider === "ollama"
           ? ollamaService.streamChat(settings.ollamaUrl, settings.ollamaModel, updatedMessages, fullSystemPrompt, attachments)
-          : llamaCppService.streamChat(settings.llamaCppUrl, updatedMessages, fullSystemPrompt, attachments);
+          : settings.provider === "llama-cpp"
+            ? llamaCppService.streamChat(settings.llamaCppUrl, updatedMessages, fullSystemPrompt, attachments)
+            : openRouterService.streamChat(settings.openRouterKey, settings.openRouterModel, updatedMessages, fullSystemPrompt, attachments);
 
       for await (const chunk of stream) {
         if (chunk.includes("<think>")) { isThinking = true; continue; }
@@ -284,11 +292,25 @@ export default function App() {
               <div className="w-px h-4 bg-[var(--border-main)] mx-1" />
               <div className="relative group">
                 <select
-                  value={settings.provider === "gemini" ? settings.geminiModel : settings.ollamaModel}
-                  onChange={(e) => setSettings({ 
-                    ...settings, 
-                    [settings.provider === "gemini" ? "geminiModel" : "ollamaModel"]: e.target.value 
-                  })}
+                  value={
+                    settings.provider === "gemini" 
+                      ? settings.geminiModel 
+                      : settings.provider === "ollama" 
+                        ? settings.ollamaModel 
+                        : settings.provider === "llama-cpp"
+                          ? settings.llamaCppModel
+                          : settings.openRouterModel
+                  }
+                  onChange={(e) => {
+                    const key = settings.provider === "gemini" 
+                      ? "geminiModel" 
+                      : settings.provider === "ollama" 
+                        ? "ollamaModel" 
+                        : settings.provider === "llama-cpp"
+                          ? "llamaCppModel"
+                          : "openRouterModel";
+                    setSettings({ ...settings, [key]: e.target.value });
+                  }}
                   className="bg-transparent text-[10px] md:text-sm font-bold pr-6 md:pr-8 outline-none appearance-none cursor-pointer max-w-[80px] md:max-w-none truncate text-[var(--text-main)]"
                 >
                   {availableModels.map(m => (

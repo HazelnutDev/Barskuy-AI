@@ -53,15 +53,25 @@ Barskuy-AI adalah asisten AI pribadi yang sangat canggih, modern, dan elegan. Ap
   ```
 - Pilih model (contoh: `deepseek-r1:7b`) di pengaturan Barskuy-AI.
 
-### 3. Llama.cpp (Lokal GGUF)
+### 3. OpenRouter (Cloud)
+- Tidak perlu instalasi tambahan.
+- Masukkan **OpenRouter API Key** di pengaturan Barskuy-AI.
+- Model akan diambil secara otomatis dari OpenRouter.
+- Pilih model yang diinginkan (contoh: `google/gemini-2.0-flash-001` atau `anthropic/claude-3-opus`).
+
+### 4. Llama.cpp (Lokal GGUF)
 - Download `llama-server` dari repositori [llama.cpp](https://github.com/ggerganov/llama.cpp).
-- **Tempat Menaruh Model**: Buat folder bernama `models` di direktori llama.cpp Anda dan letakkan file `.gguf` di sana.
-- **Cara Menjalankan (GPU Penuh + CPU)**:
-  Gunakan perintah berikut untuk efisiensi maksimal (menggunakan GPU0, GPU1, dan CPU):
+- **Penyimpanan File (File Storage)**: 
+  - Buat folder khusus bernama `models` di direktori kerja Anda.
+  - Letakkan file model berformat `.gguf` di dalam folder tersebut.
+  - Anda bisa mendownload model GGUF dari [Hugging Face](https://huggingface.co/models?search=gguf) (contoh: Llama-3, Mistral, atau DeepSeek).
+- **Pengaturan GPU (Multi-GPU Support)**:
+  Gunakan perintah berikut untuk performa maksimal. Jika Anda memiliki lebih dari satu GPU (seperti RTX 3060 + RTX 4060), Llama.cpp akan mencoba membagi beban jika dikonfigurasi dengan benar saat kompilasi.
   ```bash
-  ./llama-server -m models/nama_model_anda.gguf -ngl 99 --host 0.0.0.0 --port 8080
+  # Menjalankan dengan semua layer di GPU (-ngl 99)
+  ./llama-server -m models/nama_model.gguf -ngl 99 --host 0.0.0.0 --port 8080
   ```
-  *Catatan: `-ngl 99` akan mencoba memindahkan semua layer ke GPU.*
+  *Tips: Jika VRAM tidak cukup, kurangi angka `-ngl` (misal `-ngl 20`) agar sebagian model berjalan di CPU.*
 
 ---
 
