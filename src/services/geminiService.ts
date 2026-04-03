@@ -7,21 +7,23 @@ export class GeminiService {
   private getClient(apiKey?: string) {
     const key = apiKey || process.env.GEMINI_API_KEY;
     if (!key) {
-      throw new Error("Gemini API Key is missing. Please set it in .env or settings.");
+      throw new Error("Gemini API Key is missing. Please set it in settings.");
     }
-    if (!this.ai) {
+    // Re-initialize if the key has changed
+    if (!this.ai || (this.ai as any).apiKey !== key) {
       this.ai = new GoogleGenAI({ apiKey: key });
     }
     return this.ai;
   }
 
   async *streamChat(
+    apiKey: string,
     modelName: string,
     history: Message[],
     systemInstruction: string,
     attachments: Attachment[] = []
   ) {
-    const ai = this.getClient();
+    const ai = this.getClient(apiKey);
     // Convert history to Gemini format, excluding the last message (which is the current query)
     const geminiHistory = history.slice(0, -1).map(msg => ({
       role: msg.role === "user" ? "user" : "model",
@@ -63,8 +65,8 @@ export class GeminiService {
     }
   }
 
-  async generateImage(prompt: string) {
-    const ai = this.getClient();
+  async generateImage(apiKey: string, prompt: string) {
+    const ai = this.getClient(apiKey);
     const response = await ai.models.generateContent({
       model: "gemini-2.5-flash-image",
       contents: [{ role: "user", parts: [{ text: prompt }] }],

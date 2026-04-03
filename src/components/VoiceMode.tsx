@@ -236,7 +236,7 @@ export const VoiceMode: React.FC<VoiceModeProps> = ({ isOpen, onClose, settings 
           {/* Main Content */}
           <div className="relative z-10 flex flex-col items-center justify-between h-full w-full max-w-4xl px-8 py-20">
             {/* AI Avatar / Visualizer */}
-            <div className="flex flex-col items-center gap-12">
+            <div className="flex flex-col items-center gap-6 md:gap-12">
               <div className="relative">
                 <motion.div
                   animate={{
@@ -244,13 +244,13 @@ export const VoiceMode: React.FC<VoiceModeProps> = ({ isOpen, onClose, settings 
                     rotate: status === "speaking" ? [0, 5, -5, 0] : 0,
                   }}
                   transition={{ repeat: Infinity, duration: 2 }}
-                  className="w-40 h-40 bg-gradient-to-br from-blue-600 to-purple-600 rounded-[2.5rem] flex items-center justify-center shadow-[0_0_80px_rgba(37,99,235,0.3)] relative z-20"
+                  className="w-24 h-24 md:w-40 md:h-40 bg-gradient-to-br from-blue-600 to-purple-600 rounded-[1.5rem] md:rounded-[2.5rem] flex items-center justify-center shadow-[0_0_80px_rgba(37,99,235,0.3)] relative z-20"
                 >
-                  <Bot className="w-16 h-16 text-white" />
+                  <Bot className="w-10 h-10 md:w-16 md:h-16 text-white" />
                   
                   {/* Orbital Rings */}
-                  <div className="absolute inset-[-15px] border border-white/5 rounded-[3.5rem] animate-[spin_10s_linear_infinite]" />
-                  <div className="absolute inset-[-30px] border border-white/5 rounded-[4.5rem] animate-[spin_15s_linear_infinite_reverse]" />
+                  <div className="absolute inset-[-10px] md:inset-[-15px] border border-white/5 rounded-[2rem] md:rounded-[3.5rem] animate-[spin_10s_linear_infinite]" />
+                  <div className="absolute inset-[-20px] md:inset-[-30px] border border-white/5 rounded-[2.5rem] md:rounded-[4.5rem] animate-[spin_15s_linear_infinite_reverse]" />
                 </motion.div>
 
                 {/* Voice Waves */}
@@ -284,7 +284,7 @@ export const VoiceMode: React.FC<VoiceModeProps> = ({ isOpen, onClose, settings 
                     {status === "connecting" ? "Menghubungkan..." : "Koneksi Aktif"}
                   </span>
                 </div>
-                <h2 className="text-3xl font-black tracking-tighter text-white">
+                <h2 className="text-xl md:text-3xl font-black tracking-tighter text-white">
                   {status === "connecting" && "Menyambungkan..."}
                   {status === "ready" && "Siap berbicara"}
                   {status === "speaking" && "Barskuy sedang berbicara"}
@@ -345,24 +345,24 @@ export const VoiceMode: React.FC<VoiceModeProps> = ({ isOpen, onClose, settings 
                 ))}
               </div>
 
-              <div className="flex items-center gap-8">
+              <div className="flex items-center gap-4 md:gap-8">
                 <button
                   onClick={() => setIsMuted(!isMuted)}
                   className={cn(
-                    "p-5 rounded-2xl border transition-all active:scale-90",
+                    "p-4 md:p-5 rounded-2xl border transition-all active:scale-90",
                     isMuted 
                       ? "bg-red-500/10 border-red-500/20 text-red-400" 
                       : "bg-white/5 border-white/10 text-white/40 hover:text-white"
                   )}
                 >
-                  {isMuted ? <MicOff className="w-6 h-6" /> : <Mic className="w-6 h-6" />}
+                  {isMuted ? <MicOff className="w-5 h-5 md:w-6 h-6" /> : <Mic className="w-5 h-5 md:w-6 h-6" />}
                 </button>
 
                 <button
                   onClick={onClose}
-                  className="p-8 bg-blue-600 rounded-[2rem] text-white shadow-[0_0_50px_rgba(37,99,235,0.4)] hover:scale-105 active:scale-95 transition-all"
+                  className="p-6 md:p-8 bg-blue-600 rounded-[1.5rem] md:rounded-[2rem] text-white shadow-[0_0_50px_rgba(37,99,235,0.4)] hover:scale-105 active:scale-95 transition-all"
                 >
-                  <X className="w-8 h-8" />
+                  <X className="w-6 h-6 md:w-8 md:h-8" />
                 </button>
 
                 <button

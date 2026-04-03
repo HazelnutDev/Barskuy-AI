@@ -11,16 +11,16 @@ interface SettingsModalProps {
 
 export const SettingsModal: React.FC<SettingsModalProps> = ({ settings, onUpdate, onClose }) => {
   return (
-    <div className="fixed inset-0 z-[100] flex items-center justify-center p-2 md:p-4 bg-black/80 backdrop-blur-md">
-      <div className="w-full max-w-2xl bg-[var(--bg-card)] border border-[var(--border-main)] rounded-3xl md:rounded-[2.5rem] shadow-2xl overflow-hidden animate-in fade-in zoom-in duration-300 flex flex-col max-h-[95vh]">
+    <div className="fixed inset-0 z-[100] flex items-center justify-center p-0 md:p-4 bg-black/80 backdrop-blur-md">
+      <div className="w-full h-full md:h-auto md:max-w-2xl bg-[var(--bg-card)] border-x md:border border-[var(--border-main)] rounded-none md:rounded-[2.5rem] shadow-2xl overflow-hidden animate-in fade-in zoom-in duration-300 flex flex-col max-h-screen md:max-h-[95vh]">
         <div className="p-4 md:p-8 border-b border-[var(--border-main)] flex items-center justify-between bg-gradient-to-r from-blue-600/10 to-purple-600/10 shrink-0">
           <div className="flex items-center gap-3 md:gap-4">
             <div className="p-2 md:p-3 bg-blue-600 rounded-xl md:rounded-2xl shadow-lg shadow-blue-600/20">
               <Sliders className="w-5 h-5 md:w-6 h-6 text-white" />
             </div>
             <div>
-              <h2 className="text-xl md:text-2xl font-black text-[var(--text-main)] tracking-tight">Konfigurasi</h2>
-              <p className="text-[10px] text-[var(--text-muted)] font-medium uppercase tracking-widest">Pusat Kontrol AI Lanjutan</p>
+              <h2 className="text-lg md:text-2xl font-black text-[var(--text-main)] tracking-tight">Konfigurasi</h2>
+              <p className="text-[8px] md:text-[10px] text-[var(--text-muted)] font-medium uppercase tracking-widest">Pusat Kontrol AI Lanjutan</p>
             </div>
           </div>
           <button onClick={onClose} className="p-2 md:p-2.5 hover:bg-[var(--border-main)] rounded-xl md:rounded-2xl text-[var(--text-muted)] hover:text-[var(--text-main)] transition-all border border-transparent hover:border-[var(--border-main)]">
@@ -41,10 +41,13 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ settings, onUpdate
                 onChange={(e) => onUpdate({ ...settings, provider: e.target.value as any })}
                 className="w-full bg-[var(--bg-main)] border border-[var(--border-main)] rounded-xl md:rounded-2xl p-3 md:p-4 text-sm md:text-base text-[var(--text-main)] font-bold focus:border-blue-500/50 outline-none transition-all appearance-none cursor-pointer hover:bg-[var(--border-main)]"
               >
-                <option value="gemini">Google Gemini (Cloud)</option>
-                <option value="openrouter">OpenRouter (Cloud)</option>
-                <option value="ollama">Ollama (Mesin Lokal)</option>
-                <option value="llama-cpp">Llama.cpp (Mesin Lokal GGUF)</option>
+                <option value="gemini" className="bg-[var(--bg-card)] text-[var(--text-main)]">Google Gemini (Cloud)</option>
+                <option value="openrouter" className="bg-[var(--bg-card)] text-[var(--text-main)]">OpenRouter (Cloud)</option>
+                <option value="openai" className="bg-[var(--bg-card)] text-[var(--text-main)]">OpenAI (Cloud)</option>
+                <option value="anthropic" className="bg-[var(--bg-card)] text-[var(--text-main)]">Anthropic Claude (Cloud)</option>
+                <option value="deepseek" className="bg-[var(--bg-card)] text-[var(--text-main)]">DeepSeek (Cloud)</option>
+                <option value="ollama" className="bg-[var(--bg-card)] text-[var(--text-main)]">Ollama (Mesin Lokal)</option>
+                <option value="llama-cpp" className="bg-[var(--bg-card)] text-[var(--text-main)]">Llama.cpp (Mesin Lokal GGUF)</option>
               </select>
               <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-[var(--text-muted)] group-hover:text-[var(--text-main)] transition-colors">
                 <Cpu className="w-4 h-4 md:w-5 h-5" />
@@ -59,22 +62,26 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ settings, onUpdate
               Autentikasi & Kunci
             </label>
             <div className="space-y-3">
+              {/* Gemini API Key */}
               <div className="relative">
                 <input
                   type="password"
-                  placeholder="Gemini API Key (Otomatis)"
-                  className="w-full bg-[var(--bg-main)] border border-[var(--border-main)] rounded-xl md:rounded-2xl p-3 md:p-4 text-[var(--text-muted)] text-xs md:text-sm font-mono outline-none cursor-not-allowed"
-                  disabled
-                  value="••••••••••••••••••••••••••••"
+                  placeholder="Masukkan Gemini API Key..."
+                  className={cn(
+                    "w-full bg-[var(--bg-main)] border border-[var(--border-main)] rounded-xl md:rounded-2xl p-3 md:p-4 text-xs md:text-sm font-mono outline-none focus:border-blue-500 transition-all",
+                    settings.provider === "gemini" && "border-blue-500/30"
+                  )}
+                  value={settings.geminiKey}
+                  onChange={(e) => onUpdate({ ...settings, geminiKey: e.target.value })}
                 />
                 <div className="absolute right-4 top-1/2 -translate-y-1/2">
-                  <ShieldCheck className="w-4 h-4 text-green-500/50" />
+                  <ShieldCheck className={cn("w-4 h-4", settings.geminiKey ? "text-green-500" : "text-[var(--text-muted)]")} />
                 </div>
               </div>
               <div className="flex items-center gap-2 p-2 md:p-3 bg-blue-500/5 border border-blue-500/10 rounded-xl">
                 <Info className="w-3.5 h-3.5 md:w-4 h-4 text-blue-400 shrink-0" />
                 <p className="text-[9px] md:text-[10px] text-blue-400/80 leading-relaxed">
-                  Gemini API Key dikelola melalui panel Secrets AI Studio untuk keamanan maksimal.
+                  Dapatkan API Key di <a href="https://aistudio.google.com/app/apikey" target="_blank" rel="noreferrer" className="underline hover:text-blue-300">aistudio.google.com</a>.
                 </p>
               </div>
 
@@ -101,6 +108,114 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ settings, onUpdate
                   </div>
                 </div>
               )}
+
+              {/* OpenAI API Key */}
+              {settings.provider === "openai" && (
+                <div className="space-y-3 animate-in slide-in-from-top-2 duration-300">
+                  <div className="relative">
+                    <input
+                      type="password"
+                      placeholder="Masukkan OpenAI API Key..."
+                      className="w-full bg-[var(--bg-main)] border border-blue-500/30 rounded-xl md:rounded-2xl p-3 md:p-4 text-xs md:text-sm font-mono outline-none focus:border-blue-500 transition-all"
+                      value={settings.openaiKey}
+                      onChange={(e) => onUpdate({ ...settings, openaiKey: e.target.value })}
+                    />
+                    <div className="absolute right-4 top-1/2 -translate-y-1/2">
+                      <Key className="w-4 h-4 text-blue-400" />
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-2 p-2 md:p-3 bg-blue-500/5 border border-blue-500/10 rounded-xl">
+                    <Info className="w-3.5 h-3.5 md:w-4 h-4 text-blue-400 shrink-0" />
+                    <p className="text-[9px] md:text-[10px] text-blue-400/80 leading-relaxed">
+                      Dapatkan API Key di <a href="https://platform.openai.com/api-keys" target="_blank" rel="noreferrer" className="underline hover:text-blue-300">platform.openai.com</a>.
+                    </p>
+                  </div>
+                </div>
+              )}
+
+              {/* Anthropic API Key */}
+              {settings.provider === "anthropic" && (
+                <div className="space-y-3 animate-in slide-in-from-top-2 duration-300">
+                  <div className="relative">
+                    <input
+                      type="password"
+                      placeholder="Masukkan Anthropic API Key..."
+                      className="w-full bg-[var(--bg-main)] border border-blue-500/30 rounded-xl md:rounded-2xl p-3 md:p-4 text-xs md:text-sm font-mono outline-none focus:border-blue-500 transition-all"
+                      value={settings.anthropicKey}
+                      onChange={(e) => onUpdate({ ...settings, anthropicKey: e.target.value })}
+                    />
+                    <div className="absolute right-4 top-1/2 -translate-y-1/2">
+                      <Key className="w-4 h-4 text-blue-400" />
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-2 p-2 md:p-3 bg-blue-500/5 border border-blue-500/10 rounded-xl">
+                    <Info className="w-3.5 h-3.5 md:w-4 h-4 text-blue-400 shrink-0" />
+                    <p className="text-[9px] md:text-[10px] text-blue-400/80 leading-relaxed">
+                      Dapatkan API Key di <a href="https://console.anthropic.com/settings/keys" target="_blank" rel="noreferrer" className="underline hover:text-blue-300">console.anthropic.com</a>.
+                    </p>
+                  </div>
+                </div>
+              )}
+
+              {/* DeepSeek API Key */}
+              {settings.provider === "deepseek" && (
+                <div className="space-y-3 animate-in slide-in-from-top-2 duration-300">
+                  <div className="relative">
+                    <input
+                      type="password"
+                      placeholder="Masukkan DeepSeek API Key..."
+                      className="w-full bg-[var(--bg-main)] border border-blue-500/30 rounded-xl md:rounded-2xl p-3 md:p-4 text-xs md:text-sm font-mono outline-none focus:border-blue-500 transition-all"
+                      value={settings.deepseekKey}
+                      onChange={(e) => onUpdate({ ...settings, deepseekKey: e.target.value })}
+                    />
+                    <div className="absolute right-4 top-1/2 -translate-y-1/2">
+                      <Key className="w-4 h-4 text-blue-400" />
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-2 p-2 md:p-3 bg-blue-500/5 border border-blue-500/10 rounded-xl">
+                    <Info className="w-3.5 h-3.5 md:w-4 h-4 text-blue-400 shrink-0" />
+                    <p className="text-[9px] md:text-[10px] text-blue-400/80 leading-relaxed">
+                      Dapatkan API Key di <a href="https://platform.deepseek.com/api_keys" target="_blank" rel="noreferrer" className="underline hover:text-blue-300">platform.deepseek.com</a>.
+                    </p>
+                  </div>
+                </div>
+              )}
+
+              {/* Web Search API Keys */}
+              <div className="pt-4 border-t border-[var(--border-main)] space-y-4">
+                <label className="text-[10px] font-black text-[var(--text-muted)] uppercase tracking-[0.2em] flex items-center gap-2">
+                  <Globe className="w-3.5 h-3.5 text-green-400" />
+                  Web Search API Keys
+                </label>
+                
+                <div className="space-y-3">
+                  <div className="relative">
+                    <input
+                      type="password"
+                      placeholder="SerpApi Key..."
+                      className="w-full bg-[var(--bg-main)] border border-[var(--border-main)] rounded-xl md:rounded-2xl p-3 md:p-4 text-xs md:text-sm font-mono outline-none focus:border-blue-500 transition-all"
+                      value={settings.serpApiKey}
+                      onChange={(e) => onUpdate({ ...settings, serpApiKey: e.target.value })}
+                    />
+                    <div className="absolute right-4 top-1/2 -translate-y-1/2">
+                      <Key className="w-4 h-4 text-green-400" />
+                    </div>
+                  </div>
+                  
+                  <div className="relative">
+                    <input
+                      type="password"
+                      placeholder="Ollama Search Key..."
+                      className="w-full bg-[var(--bg-main)] border border-[var(--border-main)] rounded-xl md:rounded-2xl p-3 md:p-4 text-xs md:text-sm font-mono outline-none focus:border-blue-500 transition-all"
+                      value={settings.ollamaSearchKey}
+                      onChange={(e) => onUpdate({ ...settings, ollamaSearchKey: e.target.value })}
+                    />
+                    <div className="absolute right-4 top-1/2 -translate-y-1/2">
+                      <Key className="w-4 h-4 text-blue-400" />
+                    </div>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
 

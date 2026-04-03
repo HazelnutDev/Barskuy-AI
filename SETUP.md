@@ -90,6 +90,28 @@ npm run dev
 ```
 Aplikasi akan berjalan di `http://localhost:3000` (atau port lain yang muncul di terminal).
 
+### 🌐 Akses Publik dengan Ngrok (Opsional)
+
+Aplikasi ini mendukung integrasi **Ngrok** agar bisa diakses dari luar jaringan lokal menggunakan domain statis.
+
+#### 1. Persiapan Ngrok
+- Daftar akun gratis di [ngrok.com](https://ngrok.com/).
+- Dapatkan **Authtoken** Anda di [Dashboard Ngrok](https://dashboard.ngrok.com/get-started/your-authtoken).
+
+#### 2. Konfigurasi .env
+Tambahkan baris berikut ke file `.env` Anda:
+```env
+NGROK_AUTHTOKEN=isi_dengan_token_anda
+NGROK_DOMAIN=asp-clear-perfectly.ngrok-free.app
+```
+
+#### 3. Menjalankan Server
+Cukup jalankan perintah dev seperti biasa:
+```bash
+npm run dev
+```
+Jika token valid, Anda akan melihat URL Ngrok muncul di terminal bersama dengan URL Local dan Network.
+
 ---
 
 ## 🏗️ Build untuk Produksi

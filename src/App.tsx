@@ -10,7 +10,11 @@ import { geminiService } from "./services/geminiService";
 import { ollamaService } from "./services/ollamaService";
 import { llamaCppService } from "./services/llamaCppService";
 import { openRouterService } from "./services/openRouterService";
-import { Sparkles, Cpu, Zap, Settings, Menu, ChevronDown, Layers, Bot, Headphones, Sun, Moon, Download, X } from "lucide-react";
+import { openAiService } from "./services/openAiService";
+import { anthropicService } from "./services/anthropicService";
+import { deepSeekService } from "./services/deepSeekService";
+import { searchService } from "./services/searchService";
+import { Sparkles, Cpu, Zap, Settings, Menu, ChevronDown, Layers, Bot, Headphones, Sun, Moon, Download, X, Globe } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
 import confetti from "canvas-confetti";
 import { cn } from "./lib/utils";
@@ -47,6 +51,32 @@ export default function App() {
   const [isImageMode, setIsImageMode] = useState(false);
   const [previewImage, setPreviewImage] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+
+  const updateSettings = async (newSettings: AppSettings) => {
+    setSettings(newSettings);
+    localStorage.setItem("barskuy_settings", JSON.stringify(newSettings));
+    
+    // Save to .env via backend
+    try {
+      await fetch("/api/save-env", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          keys: {
+            GEMINI_API_KEY: newSettings.geminiKey,
+            OPENROUTER_API_KEY: newSettings.openRouterKey,
+            OPENAI_API_KEY: newSettings.openaiKey,
+            ANTHROPIC_API_KEY: newSettings.anthropicKey,
+            DEEPSEEK_API_KEY: newSettings.deepseekKey,
+            SERPAPI_KEY: newSettings.serpApiKey,
+            OLLAMA_API_KEY: newSettings.ollamaSearchKey,
+          }
+        })
+      });
+    } catch (error) {
+      console.error("Failed to save .env:", error);
+    }
+  };
   const [availableModels, setAvailableModels] = useState<string[]>([]);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
@@ -79,7 +109,7 @@ export default function App() {
     };
     mediaQuery.addEventListener("change", listener);
     return () => mediaQuery.removeEventListener("change", listener);
-  }, [settings.provider, settings.ollamaUrl, settings.llamaCppUrl, settings.openRouterKey, settings.themeMode]);
+  }, [settings.provider, settings.ollamaUrl, settings.llamaCppUrl, settings.openRouterKey, settings.geminiKey, settings.openaiKey, settings.anthropicKey, settings.deepseekKey, settings.themeMode]);
 
   const fetchModels = async () => {
     if (settings.provider === "ollama") {
@@ -90,6 +120,15 @@ export default function App() {
       setAvailableModels(models.map((m: any) => m.name));
     } else if (settings.provider === "openrouter") {
       const models = await openRouterService.getModels(settings.openRouterKey);
+      setAvailableModels(models.map((m: any) => m.id));
+    } else if (settings.provider === "openai") {
+      const models = await openAiService.getModels(settings.openaiKey);
+      setAvailableModels(models.map((m: any) => m.id));
+    } else if (settings.provider === "anthropic") {
+      const models = await anthropicService.getModels(settings.anthropicKey);
+      setAvailableModels(models.map((m: any) => m.id));
+    } else if (settings.provider === "deepseek") {
+      const models = await deepSeekService.getModels(settings.deepseekKey);
       setAvailableModels(models.map((m: any) => m.id));
     } else {
       // Gemini models are usually fixed in SDK, but we can list them
@@ -127,12 +166,24 @@ export default function App() {
     updateSessionMessages(sessionId, updatedMessages);
     setIsLoading(true);
 
+    let searchContext = "";
+    if (settings.searchProvider !== "off") {
+      const results = await searchService.search(
+        content, 
+        settings.searchProvider as any, 
+        settings.searchProvider === "serpapi" ? settings.serpApiKey : settings.ollamaSearchKey
+      );
+      if (results.length > 0) {
+        searchContext = "\n\n[Web Search Results]:\n" + results.map(r => `- ${r.title}: ${r.snippet} (${r.link})`).join("\n");
+      }
+    }
+
     // Image generation check
     if (isImageMode || content.toLowerCase().startsWith("/imagine") || content.toLowerCase().startsWith("buatkan gambar")) {
       setIsImageMode(false); // Reset mode after use
       try {
         const prompt = content.replace(/^\/imagine\s*|buatkan gambar\s*/i, "");
-        const imageUrl = await geminiService.generateImage(prompt);
+        const imageUrl = await geminiService.generateImage(settings.geminiKey, prompt);
         if (imageUrl) {
           const assistantMessage: Message = {
             id: crypto.randomUUID(),
@@ -170,7 +221,13 @@ export default function App() {
           ? settings.ollamaModel 
           : settings.provider === "llama-cpp"
             ? settings.llamaCppModel
-            : settings.openRouterModel,
+            : settings.provider === "openrouter"
+              ? settings.openRouterModel
+              : settings.provider === "openai"
+                ? settings.openaiModel
+                : settings.provider === "anthropic"
+                  ? settings.anthropicModel
+                  : settings.deepseekModel,
     };
 
     updateSessionMessages(sessionId, [...updatedMessages, initialAssistantMessage]);
@@ -181,12 +238,18 @@ export default function App() {
 
     try {
       const stream = settings.provider === "gemini"
-        ? geminiService.streamChat(settings.geminiModel, updatedMessages, fullSystemPrompt, attachments)
+        ? geminiService.streamChat(settings.geminiKey, settings.geminiModel, updatedMessages, fullSystemPrompt + searchContext, attachments)
         : settings.provider === "ollama"
-          ? ollamaService.streamChat(settings.ollamaUrl, settings.ollamaModel, updatedMessages, fullSystemPrompt, attachments)
+          ? ollamaService.streamChat(settings.ollamaUrl, settings.ollamaModel, updatedMessages, fullSystemPrompt + searchContext, attachments)
           : settings.provider === "llama-cpp"
-            ? llamaCppService.streamChat(settings.llamaCppUrl, updatedMessages, fullSystemPrompt, attachments)
-            : openRouterService.streamChat(settings.openRouterKey, settings.openRouterModel, updatedMessages, fullSystemPrompt, attachments);
+            ? llamaCppService.streamChat(settings.llamaCppUrl, updatedMessages, fullSystemPrompt + searchContext, attachments)
+            : settings.provider === "openrouter"
+              ? openRouterService.streamChat(settings.openRouterKey, settings.openRouterModel, updatedMessages, fullSystemPrompt + searchContext, attachments)
+              : settings.provider === "openai"
+                ? openAiService.streamChat(settings.openaiKey, settings.openaiModel, updatedMessages, fullSystemPrompt + searchContext, attachments)
+                : settings.provider === "anthropic"
+                  ? anthropicService.streamChat(settings.anthropicKey, settings.anthropicModel, updatedMessages, fullSystemPrompt + searchContext, attachments)
+                  : deepSeekService.streamChat(settings.deepseekKey, settings.deepseekModel, updatedMessages, fullSystemPrompt + searchContext, attachments);
 
       for await (const chunk of stream) {
         if (chunk.includes("<think>")) { isThinking = true; continue; }
@@ -276,19 +339,19 @@ export default function App() {
 
       <main className="flex-1 flex flex-col relative min-w-0">
         {/* Header */}
-        <header className="h-16 md:h-20 border-b border-[var(--border-main)] flex items-center justify-between px-4 md:px-8 bg-[var(--bg-main)]/80 backdrop-blur-xl z-30">
+        <header className="h-14 md:h-20 border-b border-[var(--border-main)] flex items-center justify-between px-3 md:px-8 bg-[var(--bg-main)]/80 backdrop-blur-xl z-30 sticky top-0">
           <div className="flex items-center gap-2 md:gap-4">
             <button 
               onClick={() => setIsSidebarOpen(true)}
               className="lg:hidden p-2 hover:bg-[var(--border-main)] rounded-xl text-[var(--text-muted)]"
             >
-              <Menu className="w-5 h-5 md:w-6 h-6" />
+              <Menu className="w-5 h-5" />
             </button>
             
-            <div className="flex items-center gap-2 md:gap-3 bg-[var(--bg-card)] border border-[var(--border-main)] p-1 md:p-1.5 rounded-xl md:rounded-2xl shadow-sm">
-              <div className="flex items-center gap-2 px-2">
-                <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse shadow-[0_0_8px_rgba(34,197,94,0.5)]" />
-                <span className="text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-widest hidden sm:block">Online</span>
+            <div className="flex items-center gap-1.5 md:gap-3 bg-[var(--bg-card)] border border-[var(--border-main)] p-1 md:p-1.5 rounded-xl md:rounded-2xl shadow-sm">
+              <div className="flex items-center gap-1.5 px-1 md:px-2">
+                <div className="w-1.5 h-1.5 md:w-2 md:h-2 bg-green-500 rounded-full animate-pulse shadow-[0_0_8px_rgba(34,197,94,0.5)]" />
+                <span className="text-[8px] md:text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-widest hidden xs:block">Online</span>
               </div>
               <div className="w-px h-4 bg-[var(--border-main)] mx-1" />
               <div className="relative group">
@@ -300,7 +363,13 @@ export default function App() {
                         ? settings.ollamaModel 
                         : settings.provider === "llama-cpp"
                           ? settings.llamaCppModel
-                          : settings.openRouterModel
+                          : settings.provider === "openrouter"
+                            ? settings.openRouterModel
+                            : settings.provider === "openai"
+                              ? settings.openaiModel
+                              : settings.provider === "anthropic"
+                                ? settings.anthropicModel
+                                : settings.deepseekModel
                   }
                   onChange={(e) => {
                     const key = settings.provider === "gemini" 
@@ -309,7 +378,13 @@ export default function App() {
                         ? "ollamaModel" 
                         : settings.provider === "llama-cpp"
                           ? "llamaCppModel"
-                          : "openRouterModel";
+                          : settings.provider === "openrouter"
+                            ? "openRouterModel"
+                            : settings.provider === "openai"
+                              ? "openaiModel"
+                              : settings.provider === "anthropic"
+                                ? "anthropicModel"
+                                : "deepseekModel";
                     setSettings({ ...settings, [key]: e.target.value });
                   }}
                   className="bg-transparent text-[10px] md:text-sm font-bold pr-6 md:pr-8 outline-none appearance-none cursor-pointer max-w-[80px] md:max-w-none truncate text-[var(--text-main)]"
@@ -353,12 +428,12 @@ export default function App() {
         {/* Chat Area */}
         <div className="flex-1 overflow-y-auto custom-scrollbar">
           {messages.length === 0 ? (
-            <div className="h-full flex flex-col items-center justify-center p-8 text-center space-y-8 max-w-3xl mx-auto">
-              <div className="space-y-4">
-                <h2 className="text-4xl font-black tracking-tighter text-[var(--text-main)]">
+            <div className="h-full flex flex-col items-center justify-center p-4 md:p-8 text-center space-y-6 md:space-y-8 max-w-3xl mx-auto">
+              <div className="space-y-3 md:space-y-4">
+                <h2 className="text-2xl md:text-4xl font-black tracking-tighter text-[var(--text-main)]">
                   Hai, {settings.user?.name.split(" ")[0]}. Ada yang bisa dibantu?
                 </h2>
-                <p className="text-[var(--text-muted)] leading-relaxed text-lg font-medium max-w-md mx-auto">
+                <p className="text-[var(--text-muted)] leading-relaxed text-sm md:text-lg font-medium max-w-md mx-auto">
                   Tanyakan apa saja, mulai dari analisis dokumen hingga pembuatan gambar.
                 </p>
               </div>
@@ -380,7 +455,7 @@ export default function App() {
         </div>
 
         {/* Input Area */}
-        <div className="bg-gradient-to-t from-[var(--bg-main)] via-[var(--bg-main)] to-transparent pt-12 pb-4">
+        <div className="bg-gradient-to-t from-[var(--bg-main)] via-[var(--bg-main)] to-transparent pt-6 md:pt-12 pb-2 md:pb-4">
           <ChatInput
             onSend={handleSend}
             onToggleVoice={() => setIsVoiceMode(true)}
@@ -388,6 +463,8 @@ export default function App() {
             provider={settings.provider}
             isImageMode={isImageMode}
             onToggleImageMode={() => setIsImageMode(!isImageMode)}
+            searchProvider={settings.searchProvider}
+            onSetSearchProvider={(provider) => updateSettings({ ...settings, searchProvider: provider })}
           />
         </div>
       </main>
@@ -445,7 +522,7 @@ export default function App() {
       {isSettingsOpen && (
         <SettingsModal
           settings={settings}
-          onUpdate={setSettings}
+          onUpdate={updateSettings}
           onClose={() => setIsSettingsOpen(false)}
         />
       )}

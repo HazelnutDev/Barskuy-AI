@@ -1,16 +1,19 @@
 import React, { useRef, useState } from "react";
-import { Send, Paperclip, Image as ImageIcon, X, Sparkles, Loader2, Cpu, Headphones } from "lucide-react";
+import { Send, Paperclip, Image as ImageIcon, X, Sparkles, Loader2, Cpu, Headphones, Globe, Check } from "lucide-react";
 import { Attachment } from "../types";
 import { cn } from "../lib/utils";
 import { processFile } from "../services/fileService";
+import { motion, AnimatePresence } from "motion/react";
 
 interface ChatInputProps {
   onSend: (content: string, attachments: Attachment[]) => void;
   onToggleVoice: () => void;
   isLoading: boolean;
-  provider: "gemini" | "ollama" | "llama-cpp" | "openrouter";
+  provider: "gemini" | "ollama" | "llama-cpp" | "openrouter" | "openai" | "anthropic" | "deepseek";
   isImageMode: boolean;
   onToggleImageMode: () => void;
+  searchProvider: "off" | "ollama" | "serpapi";
+  onSetSearchProvider: (provider: "off" | "ollama" | "serpapi") => void;
 }
 
 export const ChatInput: React.FC<ChatInputProps> = ({ 
@@ -19,13 +22,28 @@ export const ChatInput: React.FC<ChatInputProps> = ({
   isLoading, 
   provider,
   isImageMode,
-  onToggleImageMode
+  onToggleImageMode,
+  searchProvider,
+  onSetSearchProvider
 }) => {
   const [content, setContent] = useState("");
   const [attachments, setAttachments] = useState<Attachment[]>([]);
   const [isProcessing, setIsProcessing] = useState(false);
+  const [showSearchMenu, setShowSearchMenu] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const searchMenuRef = useRef<HTMLDivElement>(null);
+
+  // Close search menu when clicking outside
+  React.useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (searchMenuRef.current && !searchMenuRef.current.contains(event.target as Node)) {
+        setShowSearchMenu(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
 
   const handleSend = () => {
     if ((!content.trim() && attachments.length === 0) || isLoading) return;
@@ -82,8 +100,8 @@ export const ChatInput: React.FC<ChatInputProps> = ({
   };
 
   return (
-    <div className="p-4 max-w-5xl mx-auto w-full">
-      <div className="relative bg-[var(--bg-card)] border border-[var(--border-main)] rounded-2xl shadow-2xl focus-within:border-blue-500/50 transition-all overflow-hidden">
+    <div className="p-2 md:p-4 max-w-5xl mx-auto w-full">
+      <div className="relative bg-[var(--bg-card)] border border-[var(--border-main)] rounded-2xl shadow-2xl focus-within:border-blue-500/30 transition-all ring-0 outline-none">
         {attachments.length > 0 && (
           <div className="flex flex-wrap gap-2 p-3 border-b border-[var(--border-main)] bg-[var(--bg-main)]/50">
             {attachments.map((att) => (
@@ -114,22 +132,22 @@ export const ChatInput: React.FC<ChatInputProps> = ({
           </div>
         )}
 
-        <div className="flex items-end gap-2 p-3">
+        <div className="flex items-end gap-1 md:gap-2 p-2 md:p-3">
           <button
             onClick={() => fileInputRef.current?.click()}
             disabled={isLoading || isProcessing}
-            className="p-2.5 hover:bg-[var(--border-main)] rounded-xl text-[var(--text-muted)] hover:text-[var(--text-main)] transition-all disabled:opacity-50"
+            className="p-2 md:p-2.5 hover:bg-[var(--border-main)] rounded-xl text-[var(--text-muted)] hover:text-[var(--text-main)] transition-all disabled:opacity-50"
           >
-            {isProcessing ? <Loader2 className="w-5 h-5 animate-spin" /> : <Paperclip className="w-5 h-5" />}
+            {isProcessing ? <Loader2 className="w-4 h-4 md:w-5 h-5 animate-spin" /> : <Paperclip className="w-4 h-4 md:w-5 h-5" />}
           </button>
 
           <button
             onClick={onToggleVoice}
             disabled={isLoading || isProcessing}
-            className="p-2.5 hover:bg-blue-600/20 rounded-xl text-blue-400 hover:text-blue-300 transition-all disabled:opacity-50 group relative"
+            className="p-2 md:p-2.5 hover:bg-blue-600/20 rounded-xl text-blue-400 hover:text-blue-300 transition-all disabled:opacity-50 group relative"
           >
-            <Headphones className="w-5 h-5" />
-            <span className="absolute -top-10 left-1/2 -translate-x-1/2 px-2 py-1 bg-blue-600 text-[10px] font-bold rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none text-white">
+            <Headphones className="w-4 h-4 md:w-5 h-5" />
+            <span className="absolute -top-10 left-1/2 -translate-x-1/2 px-2 py-1 bg-blue-600 text-[10px] font-bold rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none text-white hidden md:block">
               Dual Konv. (Suara)
             </span>
           </button>
@@ -138,17 +156,66 @@ export const ChatInput: React.FC<ChatInputProps> = ({
             onClick={onToggleImageMode}
             disabled={isLoading || isProcessing}
             className={cn(
-              "p-2.5 rounded-xl transition-all disabled:opacity-50 group relative",
+              "p-2 md:p-2.5 rounded-xl transition-all disabled:opacity-50 group relative",
               isImageMode 
                 ? "bg-purple-600/20 text-purple-400 border border-purple-500/30" 
                 : "hover:bg-purple-600/10 text-purple-400/60 hover:text-purple-400"
             )}
           >
-            <ImageIcon className="w-5 h-5" />
-            <span className="absolute -top-10 left-1/2 -translate-x-1/2 px-2 py-1 bg-purple-600 text-[10px] font-bold rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none text-white">
+            <ImageIcon className="w-4 h-4 md:w-5 h-5" />
+            <span className="absolute -top-10 left-1/2 -translate-x-1/2 px-2 py-1 bg-purple-600 text-[10px] font-bold rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none text-white hidden md:block">
               Mode Gambar (DALL-E/Imagen)
             </span>
           </button>
+
+          <div className="relative" ref={searchMenuRef}>
+            <button
+              onClick={() => setShowSearchMenu(!showSearchMenu)}
+              disabled={isLoading || isProcessing}
+              className={cn(
+                "p-2 md:p-2.5 rounded-xl transition-all disabled:opacity-50 group relative",
+                searchProvider !== "off"
+                  ? "bg-green-600/20 text-green-400 border border-green-500/30"
+                  : "hover:bg-green-600/10 text-green-400/60 hover:text-green-400"
+              )}
+            >
+              <Globe className="w-4 h-4 md:w-5 h-5" />
+              <span className="absolute -top-10 left-1/2 -translate-x-1/2 px-2 py-1 bg-green-600 text-[10px] font-bold rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none text-white hidden md:block">
+                Web Search ({searchProvider})
+              </span>
+            </button>
+
+            <AnimatePresence>
+              {showSearchMenu && (
+                <div className="absolute bottom-full left-0 mb-2 w-48 bg-[var(--bg-card)] border border-[var(--border-main)] rounded-2xl shadow-2xl p-2 animate-in fade-in slide-in-from-bottom-2 duration-200 z-50">
+                  <div className="space-y-1">
+                    {[
+                      { id: "off", label: "Off (Default)", color: "text-[var(--text-muted)]" },
+                      { id: "ollama", label: "Ollama Search", color: "text-blue-400" },
+                      { id: "serpapi", label: "SerpApi Search", color: "text-green-400" }
+                    ].map((opt) => (
+                      <button
+                        key={opt.id}
+                        onClick={() => {
+                          onSetSearchProvider(opt.id as any);
+                          setShowSearchMenu(false);
+                        }}
+                        className={cn(
+                          "w-full flex items-center justify-between p-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all",
+                          searchProvider === opt.id
+                            ? "bg-white/5 text-white"
+                            : "hover:bg-white/5 text-[var(--text-muted)] hover:text-[var(--text-main)]"
+                        )}
+                      >
+                        <span className={opt.color}>{opt.label}</span>
+                        {searchProvider === opt.id && <Check className="w-3 h-3 text-blue-500" />}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </AnimatePresence>
+          </div>
           
           <textarea
             ref={textareaRef}
@@ -165,22 +232,30 @@ export const ChatInput: React.FC<ChatInputProps> = ({
                 ? "Barskuy-AI sedang berpikir..." 
                 : isImageMode 
                   ? "Deskripsikan gambar yang ingin dibuat..." 
-                  : `Pesan ${provider === "gemini" ? "Gemini" : provider === "ollama" ? "Ollama" : provider === "llama-cpp" ? "Llama.cpp" : "OpenRouter"}...`
+                  : `Pesan ${
+                      provider === "gemini" ? "Gemini" : 
+                      provider === "ollama" ? "Ollama" : 
+                      provider === "llama-cpp" ? "Llama.cpp" : 
+                      provider === "openrouter" ? "OpenRouter" :
+                      provider === "openai" ? "OpenAI" :
+                      provider === "anthropic" ? "Anthropic" :
+                      "DeepSeek"
+                    }...`
             }
-            className="flex-1 bg-transparent border-none focus:ring-0 text-[var(--text-main)] placeholder-[var(--text-muted)] py-2.5 resize-none max-h-[200px] custom-scrollbar"
+            className="flex-1 bg-transparent border-none focus:ring-0 text-[var(--text-main)] placeholder-[var(--text-muted)] py-2.5 resize-none max-h-[200px] custom-scrollbar outline-none ring-0"
           />
 
           <button
             onClick={handleSend}
             disabled={(!content.trim() && attachments.length === 0) || isLoading || isProcessing}
             className={cn(
-              "p-2.5 rounded-xl transition-all active:scale-95 disabled:opacity-50 disabled:scale-100",
+              "p-2 md:p-2.5 rounded-xl transition-all active:scale-95 disabled:opacity-50 disabled:scale-100",
               content.trim() || attachments.length > 0
                 ? "bg-blue-600 text-white shadow-lg shadow-blue-600/20"
                 : "bg-[var(--border-main)] text-[var(--text-muted)]"
             )}
           >
-            {isLoading ? <Loader2 className="w-5 h-5 animate-spin" /> : <Send className="w-5 h-5" />}
+            {isLoading ? <Loader2 className="w-4 h-4 md:w-5 h-5 animate-spin" /> : <Send className="w-4 h-4 md:w-5 h-5" />}
           </button>
         </div>
 

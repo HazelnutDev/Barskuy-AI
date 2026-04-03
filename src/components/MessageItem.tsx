@@ -120,12 +120,12 @@ export const MessageItem: React.FC<MessageItemProps> = ({ message, settings, onF
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
       className={cn(
-        "flex w-full gap-4 p-4 md:p-6 transition-colors",
+        "flex w-full gap-2 md:gap-4 p-3 md:p-6 transition-colors",
         isUser ? "flex-row-reverse" : "bg-[var(--bg-main)]/50"
       )}
     >
       <div className={cn(
-        "w-10 h-10 rounded-xl flex items-center justify-center shrink-0 shadow-lg overflow-hidden border border-[var(--border-main)]",
+        "w-8 h-8 md:w-10 md:h-10 rounded-xl flex items-center justify-center shrink-0 shadow-lg overflow-hidden border border-[var(--border-main)]",
         isUser ? "bg-blue-600" : "bg-gradient-to-br from-purple-600 to-blue-600"
       )}>
         {isUser ? (
@@ -136,7 +136,7 @@ export const MessageItem: React.FC<MessageItemProps> = ({ message, settings, onF
       </div>
 
       <div className={cn(
-        "flex-1 space-y-4 overflow-hidden max-w-[90%] md:max-w-[80%]",
+        "flex-1 space-y-3 md:space-y-4 overflow-hidden max-w-[92%] md:max-w-[80%]",
         isUser && "text-right"
       )}>
         <div className={cn(
@@ -200,8 +200,8 @@ export const MessageItem: React.FC<MessageItemProps> = ({ message, settings, onF
         )}
 
         <div className={cn(
-          "prose prose-invert max-w-none prose-p:leading-relaxed prose-pre:p-0 prose-pre:bg-transparent text-left",
-          isUser ? "bg-blue-600/10 border border-blue-500/20 p-4 rounded-2xl rounded-tr-none" : "",
+          "prose prose-invert max-w-none prose-p:leading-relaxed prose-pre:p-0 prose-pre:bg-transparent text-left text-sm md:text-base",
+          isUser ? "bg-blue-600/10 border border-blue-500/20 p-3 md:p-4 rounded-2xl rounded-tr-none" : "",
           !isUser && "prose-p:text-[var(--text-main)] prose-headings:text-[var(--text-main)] prose-strong:text-[var(--text-main)] prose-li:text-[var(--text-main)]"
         )}>
           {message.isStreaming && !message.content && !message.thinking ? (
