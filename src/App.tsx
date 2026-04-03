@@ -16,6 +16,7 @@ import confetti from "canvas-confetti";
 import { cn } from "./lib/utils";
 
 export default function App() {
+  console.log("App component rendering...");
   const {
     sessions,
     currentSessionId,

@@ -2,10 +2,17 @@ import { GoogleGenAI, GenerateContentResponse, Modality } from "@google/genai";
 import { Message, Attachment } from "../types";
 
 export class GeminiService {
-  private ai: GoogleGenAI;
+  private ai: GoogleGenAI | null = null;
 
-  constructor() {
-    this.ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY! });
+  private getClient(apiKey?: string) {
+    const key = apiKey || process.env.GEMINI_API_KEY;
+    if (!key) {
+      throw new Error("Gemini API Key is missing. Please set it in .env or settings.");
+    }
+    if (!this.ai) {
+      this.ai = new GoogleGenAI({ apiKey: key });
+    }
+    return this.ai;
   }
 
   async *streamChat(
@@ -14,13 +21,14 @@ export class GeminiService {
     systemInstruction: string,
     attachments: Attachment[] = []
   ) {
+    const ai = this.getClient();
     // Convert history to Gemini format, excluding the last message (which is the current query)
     const geminiHistory = history.slice(0, -1).map(msg => ({
       role: msg.role === "user" ? "user" : "model",
       parts: [{ text: msg.content }]
     }));
 
-    const chat = this.ai.chats.create({
+    const chat = ai.chats.create({
       model: modelName,
       config: { systemInstruction },
       history: geminiHistory as any
@@ -56,7 +64,8 @@ export class GeminiService {
   }
 
   async generateImage(prompt: string) {
-    const response = await this.ai.models.generateContent({
+    const ai = this.getClient();
+    const response = await ai.models.generateContent({
       model: "gemini-2.5-flash-image",
       contents: [{ role: "user", parts: [{ text: prompt }] }],
     });
