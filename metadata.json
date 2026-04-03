@@ -1,0 +1,8 @@
+{
+  "name": "Barskuy-AI",
+  "description": "Advanced AI Chatbot with Ollama integration, RAG, image generation, and multi-modal capabilities.",
+  "requestFramePermissions": [
+    "camera",
+    "microphone"
+  ]
+}

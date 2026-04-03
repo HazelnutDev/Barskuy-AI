@@ -1,11 +1,84 @@
-<div align="center">
+# Barskuy-AI 🚀
 
-<img width="1200" height="475" alt="GHBanner" src="https://github.com/user-attachments/assets/0aa67016-6eaf-458a-adb2-6e31a0763ed6" />
+Barskuy-AI adalah asisten AI pribadi yang sangat canggih, modern, dan elegan. Aplikasi ini dirancang untuk memberikan pengalaman chat AI terbaik dengan dukungan berbagai mesin AI (Gemini, Ollama, Llama.cpp), visualisasi data, dan fitur multimedia.
 
-  <h1>Built with AI Studio</h2>
+## ✨ Fitur Utama
 
-  <p>The fastest path from prompt to production with Gemini.</p>
+- **Multi-Engine AI**: Dukungan untuk Google Gemini (Cloud), Ollama (Lokal), dan Llama.cpp (Lokal GGUF).
+- **Visualisasi Grafik**: Otomatis membuat grafik batang, garis, atau pie dari data yang diberikan AI.
+- **Ringkasan Cerdas**: Tombol info untuk melihat ringkasan cepat dari jawaban AI yang panjang.
+- **Mode Gambar (Imagine)**: Tombol khusus untuk membuat gambar secara instan menggunakan AI.
+- **Preview Gambar**: Klik gambar apa pun untuk melihatnya dalam mode full-screen dengan fitur unduh.
+- **Mode Suara (Live)**: Interaksi suara real-time dengan latensi rendah.
+- **Manajemen Sesi**: Simpan dan kelola riwayat percakapan Anda dengan mudah.
+- **Tema Adaptif**: Mode gelap dan terang otomatis berdasarkan waktu atau preferensi sistem.
+- **Keamanan**: Kunci API dikelola dengan aman dan tidak terekspos.
 
-  <a href="https://aistudio.google.com/apps">Start building</a>
+## 🛠️ Cara Instalasi & Menjalankan
 
-</div>
+### Prasyarat
+- **Node.js** (Versi 18 atau lebih baru)
+- **NPM** atau **Yarn**
+
+### Langkah-langkah
+1. **Ekstrak File**: Jika Anda mendownload dalam format ZIP, ekstrak ke folder pilihan Anda.
+2. **Buka Terminal**: Masuk ke direktori proyek.
+3. **Instal Dependensi**:
+   ```bash
+   npm install
+   ```
+4. **Jalankan Aplikasi**:
+   ```bash
+   npm run dev
+   ```
+5. **Akses di Browser**: Buka `http://localhost:3000` (atau port yang tertera di terminal).
+
+---
+
+## 🤖 Konfigurasi Mesin AI
+
+### 1. Google Gemini (Default)
+- Tidak perlu instalasi tambahan.
+- Pastikan API Key sudah terkonfigurasi di lingkungan (otomatis jika menggunakan AI Studio).
+
+### 2. Ollama (Lokal)
+- Instal Ollama dari [ollama.com](https://ollama.com).
+- **PENTING**: Jalankan Ollama dengan izin CORS agar browser bisa mengaksesnya:
+  ```bash
+  # Windows (PowerShell)
+  $env:OLLAMA_ORIGINS="*"; ollama serve
+  
+  # Linux/Mac
+  OLLAMA_ORIGINS="*" ollama serve
+  ```
+- Pilih model (contoh: `deepseek-r1:7b`) di pengaturan Barskuy-AI.
+
+### 3. Llama.cpp (Lokal GGUF)
+- Download `llama-server` dari repositori [llama.cpp](https://github.com/ggerganov/llama.cpp).
+- **Tempat Menaruh Model**: Buat folder bernama `models` di direktori llama.cpp Anda dan letakkan file `.gguf` di sana.
+- **Cara Menjalankan (GPU Penuh + CPU)**:
+  Gunakan perintah berikut untuk efisiensi maksimal (menggunakan GPU0, GPU1, dan CPU):
+  ```bash
+  ./llama-server -m models/nama_model_anda.gguf -ngl 99 --host 0.0.0.0 --port 8080
+  ```
+  *Catatan: `-ngl 99` akan mencoba memindahkan semua layer ke GPU.*
+
+---
+
+## 📦 Cara Mendownload Aplikasi Ini
+
+Jika Anda ingin mendownload aplikasi ini untuk digunakan secara offline atau dihosting sendiri:
+
+1. **Melalui Menu Settings**: Di pojok kanan atas panel AI Studio Build, klik ikon **Settings** (roda gigi).
+2. **Export to ZIP**: Pilih opsi "Export to ZIP" untuk mendownload seluruh kode sumber aplikasi.
+3. **Export to GitHub**: Anda juga bisa menghubungkan akun GitHub Anda dan melakukan "Push" kode ini ke repositori baru.
+4. **Share**: Gunakan tombol "Share" untuk mendapatkan link aplikasi yang bisa diakses oleh orang lain secara langsung.
+
+---
+
+## 💡 Tips Penggunaan
+- Gunakan tombol **Kamera** di input chat untuk masuk ke mode pembuatan gambar.
+- Gunakan tombol **Info** di setiap pesan AI untuk melihat ringkasan.
+- Jika grafik tidak muncul, pastikan AI memberikan data dalam format JSON yang sesuai (AI sudah diinstruksikan secara otomatis melalui System Prompt).
+
+Dibuat dengan ❤️ oleh **Barskuy-AI Team**
