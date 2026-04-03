@@ -116,8 +116,54 @@ Hasil build akan berada di folder `dist/`. Anda cukup meng-upload isi folder ter
 - Instal Ollama dari [ollama.com](https://ollama.com/).
 - Jalankan dengan perintah: `OLLAMA_ORIGINS="*" ollama serve` (Penting agar browser bisa mengakses).
 
-### Llama.cpp (Lokal)
-- Jalankan `llama-server` dengan endpoint yang sesuai (default: `http://127.0.0.1:8080`).
+### 🦙 Llama.cpp (Mesin Lokal GGUF) - Panduan Lengkap
+
+Llama.cpp memungkinkan Anda menjalankan model AI (seperti Llama-3, Mistral, atau DeepSeek) secara lokal dengan efisiensi tinggi menggunakan CPU dan GPU.
+
+#### 1. Persiapan Llama.cpp
+- Download rilis terbaru `llama-server` (atau `server.exe` untuk Windows) dari [Hugging Face Llama.cpp Releases](https://github.com/ggerganov/llama.cpp/releases).
+- Pastikan Anda mendownload versi yang sesuai dengan hardware Anda (misalnya versi CUDA untuk pengguna NVIDIA GPU).
+
+#### 2. Mendownload Model (GGUF)
+- Cari model berformat `.gguf` di [Hugging Face](https://huggingface.co/models?search=gguf).
+- **Rekomendasi**: Cari model dari kreator seperti `Bartowski` atau `MaziyarPanahi` yang menyediakan kuantisasi GGUF berkualitas tinggi.
+- Contoh model populer: `Llama-3-8B-Instruct-GGUF`, `Mistral-7B-v0.3-GGUF`.
+
+#### 3. Struktur Folder Model
+Sangat disarankan untuk merapikan file model Anda:
+```text
+llama-cpp-folder/
+├── llama-server (executable)
+└── models/
+    ├── llama-3-8b.gguf
+    └── deepseek-v2.gguf
+```
+
+#### 4. Menjalankan Server dengan Akselerasi GPU
+Buka terminal/command prompt di folder Llama.cpp dan jalankan perintah berikut:
+
+**Untuk Windows (NVIDIA GPU):**
+```powershell
+.\llama-server.exe -m models\nama_model.gguf -ngl 99 --host 0.0.0.0 --port 8080
+```
+
+**Untuk Linux/Mac:**
+```bash
+./llama-server -m models/nama_model.gguf -ngl 99 --host 0.0.0.0 --port 8080
+```
+
+**Penjelasan Flag Penting:**
+- `-m models/nama_model.gguf`: Menentukan file model yang akan dimuat.
+- `-ngl 99` (Number of GPU Layers): Angka `99` memerintahkan server untuk memindahkan **semua** layer model ke GPU (VRAM). Jika VRAM Anda tidak cukup, kurangi angka ini (misal `-ngl 20`).
+- `--host 0.0.0.0`: Mengizinkan akses dari perangkat lain di jaringan yang sama.
+- `--port 8080`: Menentukan port server (default Barskuy-AI mencari di port 8080).
+
+#### 5. Menghubungkan ke Barskuy-AI
+- Buka aplikasi Barskuy-AI.
+- Masuk ke menu **Settings** (ikon roda gigi).
+- Pilih **Llama.cpp (Mesin Lokal GGUF)** sebagai Mesin AI Utama.
+- Pastikan **Endpoint Llama.cpp** sesuai dengan alamat server Anda (default: `http://127.0.0.1:8080`).
+- Klik **Tes Koneksi** untuk memastikan status server aktif.
 
 ---
 
