@@ -75,17 +75,6 @@ Barskuy-AI adalah asisten AI pribadi yang sangat canggih, modern, dan elegan. Ap
 
 ---
 
-## 📦 Cara Mendownload Aplikasi Ini
-
-Jika Anda ingin mendownload aplikasi ini untuk digunakan secara offline atau dihosting sendiri:
-
-1. **Melalui Menu Settings**: Di pojok kanan atas panel AI Studio Build, klik ikon **Settings** (roda gigi).
-2. **Export to ZIP**: Pilih opsi "Export to ZIP" untuk mendownload seluruh kode sumber aplikasi.
-3. **Export to GitHub**: Anda juga bisa menghubungkan akun GitHub Anda dan melakukan "Push" kode ini ke repositori baru.
-4. **Share**: Gunakan tombol "Share" untuk mendapatkan link aplikasi yang bisa diakses oleh orang lain secara langsung.
-
----
-
 ## 💡 Tips Penggunaan
 - Gunakan tombol **Kamera** di input chat untuk masuk ke mode pembuatan gambar.
 - Gunakan tombol **Info** di setiap pesan AI untuk melihat ringkasan.
